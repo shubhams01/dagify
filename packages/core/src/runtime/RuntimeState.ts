@@ -1,0 +1,7 @@
+export enum RuntimeState {
+  CREATED = "CREATED",
+  RUNNING = "RUNNING",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED"
+}

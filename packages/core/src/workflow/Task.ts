@@ -16,7 +16,7 @@ export class Task<T = unknown> {
 
   public readonly retries: number;
 
-  public readonly timeout?: number;
+  public readonly timeout: number | undefined;
 
   constructor(
     id: string,

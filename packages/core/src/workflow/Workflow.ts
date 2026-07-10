@@ -1,86 +1,89 @@
+import { Graph } from "../graph";
 import { Task } from "./Task";
 
 export class Workflow {
-  public readonly id: string;
 
-  private readonly tasks = new Map<string, Task>();
+    public readonly id: string;
 
-  /**
-   * dependency -> dependents
-   *
-   * extract -> transform
-   * transform -> load
-   */
-  private readonly edges = new Map<string, Set<string>>();
+    private readonly graph =
+        new Graph<Task>();
 
-  constructor(id: string) {
-    if (!id.trim()) {
-      throw new Error("Workflow id cannot be empty.");
+    constructor(id: string) {
+
+        if (!id.trim()) {
+            throw new Error("Workflow id cannot be empty.");
+        }
+
+        this.id = id;
     }
 
-    this.id = id;
-  }
+    task(task: Task): this {
 
-  task(task: Task): this {
-    if (this.tasks.has(task.id)) {
-      throw new Error(`Task '${task.id}' already exists.`);
+        this.graph.addNode(
+            task.id,
+            task
+        );
+
+        return this;
     }
 
-    this.tasks.set(task.id, task);
-    this.edges.set(task.id, new Set());
+    dependsOn(
+        taskId: string,
+        dependencyId: string
+    ): this {
 
-    return this;
-  }
+        this.graph.addEdge(
+            dependencyId,
+            taskId
+        );
 
-  dependsOn(taskId: string, dependencyId: string): this {
-    if (!this.tasks.has(taskId)) {
-      throw new Error(`Unknown task '${taskId}'.`);
+        return this;
     }
 
-    if (!this.tasks.has(dependencyId)) {
-      throw new Error(`Unknown dependency '${dependencyId}'.`);
+    getTask(id: string): Task {
+
+        return this.graph
+            .getNode(id)
+            .value;
     }
 
-    this.edges.get(dependencyId)!.add(taskId);
+    getTasks(): readonly Task[] {
 
-    return this;
-  }
-
-  getTask(id: string): Task {
-    const task = this.tasks.get(id);
-
-    if (!task) {
-      throw new Error(`Task '${id}' not found.`);
+        return this.graph
+            .values()
+            .map(node => node.value);
     }
 
-    return task;
-  }
+    getDependencies(taskId: string) {
 
-  getTasks(): readonly Task[] {
-    return [...this.tasks.values()];
-  }
-
-  getDependents(taskId: string): readonly string[] {
-    return [...(this.edges.get(taskId) ?? [])];
-  }
-
-  getDependencies(taskId: string): string[] {
-    const dependencies: string[] = [];
-
-    for (const [dependency, dependents] of this.edges) {
-      if (dependents.has(taskId)) {
-        dependencies.push(dependency);
-      }
+        return this.graph
+            .predecessors(taskId);
     }
 
-    return dependencies;
-  }
+    getDependents(taskId: string) {
 
-  hasTask(id: string): boolean {
-    return this.tasks.has(id);
-  }
+        return this.graph
+            .successors(taskId);
+    }
 
-  get size(): number {
-    return this.tasks.size;
-  }
+    hasTask(id: string): boolean {
+
+        return this.graph
+            .hasNode(id);
+    }
+
+    get size() {
+
+        return this.graph.size;
+    }
+
+    /**
+     * Internal graph access.
+     * Algorithms use this.
+     */
+    getGraph() {
+
+        return this.graph;
+    }
+
 }

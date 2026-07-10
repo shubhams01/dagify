@@ -1,0 +1,7 @@
+export enum TaskState {
+  PENDING = "PENDING",
+  RUNNING = "RUNNING",
+  SUCCESS = "SUCCESS",
+  FAILED = "FAILED",
+  SKIPPED = "SKIPPED"
+}

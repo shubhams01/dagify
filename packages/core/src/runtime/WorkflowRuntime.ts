@@ -1,6 +1,8 @@
-import { WorkflowExecution } from "./WorkflowExecution";
-import { ExecutionEngine } from "./ExecutionEngine";
+import { Workflow } from "../workflow";
 import { WorkflowValidator } from "../validation";
+
+import { ExecutionEngine } from "./ExecutionEngine";
+import { WorkflowExecution } from "./WorkflowExecution";
 
 export class WorkflowRuntime {
 
@@ -9,11 +11,12 @@ export class WorkflowRuntime {
   private readonly engine = new ExecutionEngine();
 
   public async execute(
-    execution: WorkflowExecution
-  ): Promise<void> {
+    workflow: Workflow
+  ): Promise<WorkflowExecution> {
 
-    // Validate workflow before execution
-    this.validator.validate(execution.workflow);
+    this.validator.validate(workflow);
+
+    const execution = new WorkflowExecution(workflow);
 
     execution.start();
 
@@ -22,6 +25,8 @@ export class WorkflowRuntime {
       await this.engine.run(execution);
 
       execution.complete();
+
+      return execution;
 
     } catch (error) {
 

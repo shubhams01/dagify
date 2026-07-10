@@ -1,0 +1,16 @@
+{
+  "name": "@dagify/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "dagify": "./dist/index.js"
+  },
+  "dependencies": {
+    "@dagify/sdk": "*"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --tsconfig ../../tsconfig.json --format esm",
+    "dev": "tsx src/index.ts"
+  }
+}

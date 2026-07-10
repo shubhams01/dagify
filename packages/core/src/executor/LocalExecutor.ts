@@ -1,19 +1,12 @@
+import { ExecutionContext, TaskResult } from "../runtime";
+import { Task } from "../workflow";
 import { Executor } from "./Executor";
-import {
-  Task,
-  TaskContext,
-  TaskResult
-} from "../workflow";
 
 export class LocalExecutor implements Executor {
-
-  async execute<T>(
+  public async execute<T>(
     task: Task<T>,
-    context: TaskContext
+    context: ExecutionContext,
   ): Promise<TaskResult<T>> {
-
     return task.execute(context);
-
   }
-
 }

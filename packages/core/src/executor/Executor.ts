@@ -1,8 +1,11 @@
-import { Task, TaskContext, TaskResult } from "../workflow";
+import { ExecutionContext, TaskResult } from "../runtime";
+import { Task } from "../workflow";
 
 export interface Executor {
+
   execute<T>(
     task: Task<T>,
-    context: TaskContext
+    context: ExecutionContext
   ): Promise<TaskResult<T>>;
+
 }

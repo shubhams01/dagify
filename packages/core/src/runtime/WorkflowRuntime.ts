@@ -1,6 +1,6 @@
-import { WorkflowValidator } from "../validation";
-import { ExecutionEngine } from "./ExecutionEngine";
 import { WorkflowExecution } from "./WorkflowExecution";
+import { ExecutionEngine } from "./ExecutionEngine";
+import { WorkflowValidator } from "../validation";
 
 export class WorkflowRuntime {
 

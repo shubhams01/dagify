@@ -1,0 +1,15 @@
+{
+  "name": "@dagify/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts --watch",
+    "test": "vitest"
+  }
+}

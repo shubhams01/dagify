@@ -36,3 +36,13 @@ body{
     background:#233044;
     border-radius:10px;
 }
+
+@keyframes dash-flow {
+  from {
+    stroke-dashoffset: 20;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}

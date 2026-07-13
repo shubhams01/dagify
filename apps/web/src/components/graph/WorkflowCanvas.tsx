@@ -1,27 +1,27 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 
 import ReactFlow, {
   Background,
   BackgroundVariant,
-  MiniMap,
-  ReactFlowProvider,
-  useNodesState,
-  useEdgesState,
   ConnectionMode,
-  MarkerType,
-  Node,
   Edge,
+  MarkerType,
+  MiniMap,
+  Node,
+  ReactFlowProvider,
+  useEdgesState,
+  useNodesState,
 } from "reactflow";
 
 import "reactflow/dist/style.css";
 
-import { useCanvas } from "@/hooks/useCanvas";
-
 import WorkflowNode from "./WorkflowNode";
 import WorkflowEdge from "./WorkflowEdge";
-import Toolbar from "./Toolbar";
+import CanvasToolbar from "./CanvasToolbar";
+
+import { useExecution } from "@/hooks/useExecution";
 
 const nodeTypes = {
   workflow: WorkflowNode,
@@ -31,208 +31,290 @@ const edgeTypes = {
   workflow: WorkflowEdge,
 };
 
-const initialNodes: Node[] = [
+const workflowNodes: Node[] = [
   {
     id: "extract",
     type: "workflow",
-    position: { x: 350, y: 80 },
+    position: { x: 450, y: 80 },
     data: {
       name: "Extract",
       type: "SQL",
-      status: "success",
       duration: "1.2s",
       retry: 0,
+      status: "pending",
+      progress: 0,
     },
   },
-
   {
     id: "transform",
     type: "workflow",
-    position: { x: 120, y: 280 },
+    position: { x: 180, y: 280 },
     data: {
       name: "Transform",
-      type: "Function",
-      status: "running",
+      type: "Python",
       duration: "0.8s",
       retry: 0,
+      status: "pending",
+      progress: 0,
     },
   },
-
   {
     id: "validate",
     type: "workflow",
-    position: { x: 580, y: 280 },
+    position: { x: 720, y: 280 },
     data: {
       name: "Validate",
       type: "Validation",
-      status: "pending",
-      duration: "--",
+      duration: "0.6s",
       retry: 0,
+      status: "pending",
+      progress: 0,
     },
   },
-
   {
     id: "load",
     type: "workflow",
-    position: { x: 350, y: 520 },
+    position: { x: 450, y: 520 },
     data: {
       name: "Load",
       type: "Storage",
-      status: "pending",
-      duration: "--",
+      duration: "0.9s",
       retry: 0,
+      status: "pending",
+      progress: 0,
     },
   },
 ];
 
-const initialEdges: Edge[] = [
+const workflowEdges: Edge[] = [
   {
     id: "e1",
-
     source: "extract",
-
     target: "transform",
-
     type: "workflow",
-
     markerEnd: {
       type: MarkerType.ArrowClosed,
     },
+    data: {
+      status: "pending",
+    },
   },
-
   {
     id: "e2",
-
     source: "extract",
-
     target: "validate",
-
     type: "workflow",
-
     markerEnd: {
       type: MarkerType.ArrowClosed,
     },
+    data: {
+      status: "pending",
+    },
   },
-
   {
     id: "e3",
-
     source: "transform",
-
     target: "load",
-
     type: "workflow",
-
     markerEnd: {
       type: MarkerType.ArrowClosed,
     },
+    data: {
+      status: "pending",
+    },
   },
-
   {
     id: "e4",
-
     source: "validate",
-
     target: "load",
-
     type: "workflow",
-
     markerEnd: {
       type: MarkerType.ArrowClosed,
+    },
+    data: {
+      status: "pending",
     },
   },
 ];
 
 function Canvas() {
-  const {
-    setNodes,
-    setEdges,
-    selectNode,
-    setZoom,
-  } = useCanvas();
+  const execution = useExecution();
 
-  const [nodes, , onNodesChange] =
-    useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState(workflowNodes);
 
-  const [edges, , onEdgesChange] =
-    useEdgesState(initialEdges);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(workflowEdges);
 
+  const [locked, setLocked] = useState(false);
+
+  const [tool, setTool] = useState<"pointer" | "hand">("pointer");
+
+  /**
+   * Sync execution status into nodes
+   */
   useEffect(() => {
-    setNodes(nodes);
-  }, [nodes, setNodes]);
+    setNodes((current) =>
+      current.map((node) => {
+        const runtime = execution.nodes[node.id];
 
+        let progress = 0;
+
+        if (runtime?.status === "running") {
+          progress = execution.progress;
+        } else if (runtime?.status === "success") {
+          progress = 100;
+        }
+
+        return {
+          ...node,
+
+          data: {
+            ...node.data,
+
+            status: runtime?.status ?? "pending",
+
+            progress,
+          },
+        };
+      }),
+    );
+  }, [execution.nodes, execution.progress, setNodes]);
+
+  /**
+   * Sync execution status into edges
+   */
   useEffect(() => {
-    setEdges(edges);
-  }, [edges, setEdges]);
+    setEdges((current) =>
+      current.map((edge) => ({
+        ...edge,
 
-  const defaultViewport = useMemo(
-    () => ({
-      x: 0,
-      y: 0,
-      zoom: 0.9,
-    }),
-    [],
-  );
+        data: {
+          status: execution.nodes[edge.source]?.status ?? "pending",
+        },
+      })),
+    );
+  }, [execution.nodes, setEdges]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-[#050816]">
-
-      {/* Ambient Glow */}
+    <div className="relative h-full w-full overflow-hidden bg-[#030712]">
+      {/* Ambient Background */}
 
       <div className="pointer-events-none absolute inset-0">
+        <div
+          className="
+          absolute
+          left-1/2
+          top-1/2
+          h-[900px]
+          w-[900px]
+          -translate-x-1/2
+          -translate-y-1/2
+          rounded-full
+          bg-blue-600/10
+          blur-[220px]
+        "
+        />
 
-        <div className="absolute left-1/2 top-1/2 h-[900px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600/10 blur-[220px]" />
+        <div
+          className="
+          absolute
+          left-0
+          top-0
+          h-[500px]
+          w-[500px]
+          rounded-full
+          bg-cyan-500/5
+          blur-[180px]
+        "
+        />
 
-        <div className="absolute left-0 top-0 h-[500px] w-[500px] rounded-full bg-cyan-500/5 blur-[180px]" />
-
-        <div className="absolute bottom-0 right-0 h-[600px] w-[600px] rounded-full bg-indigo-500/5 blur-[180px]" />
-
+        <div
+          className="
+          absolute
+          bottom-0
+          right-0
+          h-[600px]
+          w-[600px]
+          rounded-full
+          bg-indigo-500/5
+          blur-[180px]
+        "
+        />
       </div>
 
-      <Toolbar />
-
       <ReactFlow
-        defaultViewport={defaultViewport}
-        fitView
         nodes={nodes}
         edges={edges}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onNodeClick={(_, node) => selectNode(node.id)}
-        onMove={(_, viewport) => setZoom(viewport.zoom)}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        fitView
         connectionMode={ConnectionMode.Loose}
-        panOnDrag
+        minZoom={0.3}
+        maxZoom={2}
+        defaultViewport={{
+          x: 0,
+          y: 0,
+          zoom: 0.9,
+        }}
+        nodesDraggable={!locked}
+        nodesConnectable={!locked}
+        elementsSelectable={!locked}
+        nodesFocusable={!locked}
+        edgesFocusable={!locked}
+        panOnDrag={tool === "hand"}
+        selectionOnDrag={tool === "pointer"}
         panOnScroll
         zoomOnScroll
         zoomOnPinch
         zoomOnDoubleClick={false}
-        selectionOnDrag
-        elevateEdgesOnSelect
         elevateNodesOnSelect
-        minZoom={0.3}
-        maxZoom={2}
+        elevateEdgesOnSelect
         proOptions={{
           hideAttribution: true,
         }}
       >
+        <CanvasToolbar
+          tool={tool}
+          locked={locked}
+          setTool={setTool}
+          setLocked={setLocked}
+        />
+
         <Background
           variant={BackgroundVariant.Cross}
-          gap={30}
+          gap={28}
           size={1}
           color="#243244"
         />
 
         <MiniMap
-          zoomable
           pannable
-          nodeColor="#2563EB"
-          maskColor="rgba(5,8,22,.7)"
-          className="!rounded-xl !border !border-slate-700 !bg-slate-900"
+          zoomable
+          nodeColor={(node) => {
+            switch (node.data.status) {
+              case "running":
+                return "#3B82F6";
+
+              case "success":
+                return "#22C55E";
+
+              case "failed":
+                return "#EF4444";
+
+              default:
+                return "#64748B";
+            }
+          }}
+          maskColor="rgba(3,7,18,.75)"
+          className="
+            !rounded-xl
+            !border
+            !border-slate-700
+            !bg-[#0F172A]
+          "
         />
       </ReactFlow>
-
     </div>
   );
 }

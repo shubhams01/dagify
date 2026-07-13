@@ -1,31 +1,27 @@
-import StudioHeader from "./StudioHeader";
-// import StudioSidebar from "./StudioSidebar";
+import StudioHeader from "@/components/header/StudioHeader"; // import StudioSidebar from "./StudioSidebar";
+import Sidebar from "@/components/sidebar/Sidebar";
 import WorkflowCanvas from "../graph/WorkflowCanvas";
+import WorkflowExplorer from "@/components/explorer/WorkflowExplorer";
 // import Inspector from "./Inspector";
 // import Timeline from "./Timeline";
+import BottomPanel from "@/components/execution/BottomPanel";
 
 export default function Studio() {
   return (
-    <div className="h-screen overflow-hidden bg-[#070B14] text-white">
+    <div className="flex h-screen flex-col">
       <StudioHeader />
 
-      <main className="flex h-[calc(100vh-64px)]">
-        {/* <StudioSidebar /> */}
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar />
 
-        <section className="flex flex-1 flex-col">
-          <div className="flex flex-1 overflow-hidden">
-            <div className="flex-1 border-r border-white/5">
-              <WorkflowCanvas />
-            </div>
+        <div className="flex flex-1">
+          <WorkflowCanvas />
 
-            <div className="w-[340px]">
-              {/* <Inspector /> */}
-            </div>
-          </div>
+          {/* <Inspector /> */}
+        </div>
+      </div>
 
-          {/* <Timeline /> */}
-        </section>
-      </main>
+      {/* <BottomPanel /> */}
     </div>
   );
 }

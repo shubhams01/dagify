@@ -2,289 +2,351 @@
 
 import { memo } from "react";
 
-import {
-  Handle,
-  Position,
-  NodeProps,
-} from "reactflow";
+import { Handle, NodeProps, Position } from "reactflow";
 
 import {
   Database,
-  CheckCircle2,
-  CircleDashed,
-  LoaderCircle,
-  CircleX,
+  Workflow,
   Clock3,
   RotateCcw,
-  Activity,
+  CheckCircle2,
+  LoaderCircle,
+  CircleDashed,
+  CircleX,
+  MoreHorizontal,
 } from "lucide-react";
 
-import { useCanvas } from "@/hooks/useCanvas";
-
-type Status =
-  | "pending"
-  | "running"
-  | "success"
-  | "failed";
+type Status = "pending" | "running" | "success" | "failed";
 
 const STATUS = {
   pending: {
     icon: CircleDashed,
     border: "border-slate-700",
-    text: "text-slate-400",
-    ring: "bg-slate-500",
+    text: "text-slate-500",
+    progress: "bg-slate-700",
   },
 
   running: {
     icon: LoaderCircle,
-    border: "border-blue-500",
+    border: "border-blue-500/40",
     text: "text-blue-400",
-    ring: "bg-blue-500 animate-pulse",
+    progress: "bg-blue-500",
   },
 
   success: {
     icon: CheckCircle2,
-    border: "border-green-500",
-    text: "text-green-400",
-    ring: "bg-green-500",
+    border: "border-emerald-500/40",
+    text: "text-emerald-400",
+    progress: "bg-emerald-500",
   },
 
   failed: {
     icon: CircleX,
-    border: "border-red-500",
+    border: "border-red-500/40",
     text: "text-red-400",
-    ring: "bg-red-500",
+    progress: "bg-red-500",
   },
 };
 
-function WorkflowNode({
-  id,
-  data,
-}: NodeProps<any>) {
+function Metric({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div
+      className="
+        rounded-xl
+        border
+        border-slate-800
+        bg-slate-900
+        p-3
+      "
+    >
+      <div className="flex items-center gap-1 text-xs text-slate-500">
+        {icon}
+        {label}
+      </div>
 
-  const { selectedNodeId } = useCanvas();
+      <div className="mt-2 text-sm font-semibold capitalize">{value}</div>
+    </div>
+  );
+}
 
-  const selected = selectedNodeId === id;
-
-  const state =
-    STATUS[data.status as Status];
+function WorkflowNode({ data, selected }: NodeProps<any>) {
+  const state = STATUS[data.status as Status];
 
   const StatusIcon = state.icon;
 
+  const progress = data.progress ?? 0;
+
   return (
     <>
-
       <Handle
         type="target"
         position={Position.Top}
         className="
-        !h-3
-        !w-3
-        !border-2
-        !border-[#050816]
-        !bg-blue-500
+          !h-3
+          !w-3
+          !border-2
+          !border-[#030712]
+          !bg-blue-500
         "
       />
 
       <div
         className={`
-        group
-        relative
-        w-[270px]
-        overflow-hidden
-        rounded-3xl
-        border
-        bg-[#0B1220]/90
-        backdrop-blur-xl
-        transition-all
-        duration-300
+          group
+          relative
+          w-[290px]
+          overflow-hidden
+          rounded-2xl
+          border
+          bg-[#0F172A]/95
+          backdrop-blur-xl
+          transition-all
+          duration-500
 
-        ${state.border}
+          ${state.border}
 
-        ${
-          selected
-            ? "ring-2 ring-blue-500 shadow-[0_0_45px_rgba(59,130,246,.35)] scale-[1.02]"
-            : "hover:scale-[1.02] hover:border-blue-400"
-        }
+          ${
+            selected
+              ? "ring-2 ring-blue-500 scale-[1.02]"
+              : "hover:scale-[1.02]"
+          }
+
+          ${
+            data.status === "running"
+              ? "shadow-[0_0_45px_rgba(59,130,246,.45)]"
+              : ""
+          }
+
+          ${
+            data.status === "success"
+              ? "shadow-[0_0_30px_rgba(34,197,94,.25)]"
+              : ""
+          }
+
+          ${
+            data.status === "failed"
+              ? "shadow-[0_0_30px_rgba(239,68,68,.25)]"
+              : ""
+          }
         `}
       >
-
-        {/* Top Gradient */}
+        {/* Top Accent */}
 
         <div
-          className="
-          absolute
-          left-0
-          right-0
-          top-0
-          h-1
-          bg-gradient-to-r
-          from-blue-500
-          via-cyan-500
-          to-blue-500
-          "
+          className={`
+            absolute
+            left-0
+            right-0
+            top-0
+            h-1
+
+            ${data.status === "running" ? "animate-pulse" : ""}
+
+            bg-gradient-to-r
+            from-blue-500
+            via-cyan-400
+            to-blue-500
+          `}
         />
 
         <div className="p-5">
-
           {/* Header */}
 
-          <div className="flex items-center justify-between">
-
-            <div className="flex items-center gap-4">
-
+          <div className="flex items-start justify-between">
+            <div className="flex gap-3">
               <div
                 className="
-                flex
-                h-12
-                w-12
-                items-center
-                justify-center
-                rounded-2xl
-                bg-slate-800
+                  flex
+                  h-12
+                  w-12
+                  items-center
+                  justify-center
+                  rounded-xl
+                  bg-slate-800
                 "
               >
                 <Database size={22} />
               </div>
 
               <div>
+                <h3 className="font-semibold text-white">{data.name}</h3>
 
-                <h3 className="font-semibold">
-
-                  {data.name}
-
-                </h3>
-
-                <p className="text-xs text-slate-400">
+                <div
+                  className="
+                    mt-2
+                    inline-flex
+                    items-center
+                    gap-1
+                    rounded-full
+                    bg-slate-800
+                    px-2.5
+                    py-1
+                    text-[11px]
+                    text-slate-400
+                  "
+                >
+                  <Workflow size={12} />
 
                   {data.type}
+                </div>
 
-                </p>
+                <div
+                  className={`
+                    mt-2
+                    inline-flex
+                    rounded-full
+                    px-2.5
+                    py-1
+                    text-[11px]
+                    font-semibold
 
+                    ${
+                      data.status === "running"
+                        ? "bg-blue-500/20 text-blue-300"
+                        : ""
+                    }
+
+                    ${
+                      data.status === "success"
+                        ? "bg-emerald-500/20 text-emerald-300"
+                        : ""
+                    }
+
+                    ${
+                      data.status === "failed"
+                        ? "bg-red-500/20 text-red-300"
+                        : ""
+                    }
+
+                    ${
+                      data.status === "pending"
+                        ? "bg-slate-800 text-slate-400"
+                        : ""
+                    }
+                  `}
+                >
+                  {data.status.toUpperCase()}
+                </div>
               </div>
-
             </div>
 
-            <StatusIcon
-              className={`${state.text}`}
-              size={22}
-            />
+            <div className="flex items-center gap-2">
+              <StatusIcon
+                size={20}
+                className={`
+                  ${state.text}
 
+                  ${data.status === "running" ? "animate-spin" : ""}
+                `}
+              />
+
+              <button
+                className="
+                  rounded-lg
+                  p-2
+                  opacity-0
+                  transition
+                  group-hover:opacity-100
+                  hover:bg-slate-800
+                "
+              >
+                <MoreHorizontal size={16} />
+              </button>
+            </div>
           </div>
 
-          {/* Divider */}
+          {/* Metrics */}
 
-          <div className="my-5 border-t border-slate-800" />
+          <div className="mt-5 grid grid-cols-3 gap-3">
+            <Metric
+              icon={<StatusIcon size={14} className={state.text} />}
+              label="Status"
+              value={data.status}
+            />
 
-          {/* Stats */}
+            <Metric
+              icon={<Clock3 size={14} />}
+              label="Runtime"
+              value={data.status === "running" ? "Running..." : data.duration}
+            />
 
-          <div className="grid grid-cols-2 gap-3">
+            <Metric
+              icon={<RotateCcw size={14} />}
+              label="Retry"
+              value={String(data.retry)}
+            />
+          </div>
 
-            <div
-              className="
-              rounded-xl
-              border
-              border-slate-800
-              bg-slate-900
-              p-3
-              "
-            >
+          {/* Progress */}
 
-              <div className="flex items-center gap-2 text-xs text-slate-400">
+          <div className="mt-5">
+            <div className="mb-2 flex items-center justify-between text-xs">
+              <span className="text-slate-400">Progress</span>
 
-                <Clock3 size={14} />
-
-                Runtime
-
-              </div>
-
-              <div className="mt-2 text-sm font-semibold">
-
-                {data.duration}
-
-              </div>
-
+              <span className="font-medium">{progress}%</span>
             </div>
 
             <div
               className="
-              rounded-xl
-              border
-              border-slate-800
-              bg-slate-900
-              p-3
+                h-2.5
+                overflow-hidden
+                rounded-full
+                bg-slate-800
               "
             >
+              <div
+                style={{
+                  width: `${progress}%`,
+                }}
+                className={`
+                  h-full
+                  rounded-full
+                  transition-all
+                  duration-700
+                  ease-in-out
 
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-
-                <RotateCcw size={14} />
-
-                Retry
-
-              </div>
-
-              <div className="mt-2 text-sm font-semibold">
-
-                {data.retry}
-
-              </div>
-
+                  ${state.progress}
+                `}
+              />
             </div>
-
           </div>
 
           {/* Footer */}
 
-          <div className="mt-5 flex items-center justify-between">
-
-            <div className="flex items-center gap-2">
-
-              <span
-                className={`
-                h-2.5
-                w-2.5
-                rounded-full
-                ${state.ring}
-                `}
-              />
-
-              <span
-                className={`text-sm capitalize ${state.text}`}
-              >
-
-                {data.status}
-
-              </span>
-
-            </div>
-
-            <div className="flex items-center gap-2 text-slate-500">
-
-              <Activity size={16} />
-
-              Task
-
-            </div>
-
+          <div
+            className="
+              mt-5
+              flex
+              items-center
+              gap-2
+              text-xs
+              text-slate-500
+            "
+          >
+            SQL → Transform → Storage
           </div>
-
         </div>
-
       </div>
 
       <Handle
         type="source"
         position={Position.Bottom}
         className="
-        !h-3
-        !w-3
-        !border-2
-        !border-[#050816]
-        !bg-cyan-500
+          !h-3
+          !w-3
+          !border-2
+          !border-[#030712]
+          !bg-cyan-500
         "
       />
-
     </>
   );
 }

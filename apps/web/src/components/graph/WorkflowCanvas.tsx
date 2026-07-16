@@ -22,6 +22,7 @@ import WorkflowEdge from "./WorkflowEdge";
 import CanvasToolbar from "./CanvasToolbar";
 
 import { useExecution } from "@/hooks/useExecution";
+import { useWorkflowStore } from "@/store/workflow.store";
 
 const nodeTypes = {
   workflow: WorkflowNode,
@@ -31,122 +32,144 @@ const edgeTypes = {
   workflow: WorkflowEdge,
 };
 
-const workflowNodes: Node[] = [
-  {
-    id: "extract",
-    type: "workflow",
-    position: { x: 450, y: 80 },
-    data: {
-      name: "Extract",
-      type: "SQL",
-      duration: "1.2s",
-      retry: 0,
-      status: "pending",
-      progress: 0,
-    },
-  },
-  {
-    id: "transform",
-    type: "workflow",
-    position: { x: 180, y: 280 },
-    data: {
-      name: "Transform",
-      type: "Python",
-      duration: "0.8s",
-      retry: 0,
-      status: "pending",
-      progress: 0,
-    },
-  },
-  {
-    id: "validate",
-    type: "workflow",
-    position: { x: 720, y: 280 },
-    data: {
-      name: "Validate",
-      type: "Validation",
-      duration: "0.6s",
-      retry: 0,
-      status: "pending",
-      progress: 0,
-    },
-  },
-  {
-    id: "load",
-    type: "workflow",
-    position: { x: 450, y: 520 },
-    data: {
-      name: "Load",
-      type: "Storage",
-      duration: "0.9s",
-      retry: 0,
-      status: "pending",
-      progress: 0,
-    },
-  },
-];
+// const workflowNodes: Node[] = [
+//   {
+//     id: "extract",
+//     type: "workflow",
+//     position: { x: 450, y: 80 },
+//     data: {
+//       name: "Extract",
+//       type: "SQL",
+//       duration: "1.2s",
+//       retry: 0,
+//       status: "pending",
+//       progress: 0,
+//     },
+//   },
+//   {
+//     id: "transform",
+//     type: "workflow",
+//     position: { x: 180, y: 280 },
+//     data: {
+//       name: "Transform",
+//       type: "Python",
+//       duration: "0.8s",
+//       retry: 0,
+//       status: "pending",
+//       progress: 0,
+//     },
+//   },
+//   {
+//     id: "validate",
+//     type: "workflow",
+//     position: { x: 720, y: 280 },
+//     data: {
+//       name: "Validate",
+//       type: "Validation",
+//       duration: "0.6s",
+//       retry: 0,
+//       status: "pending",
+//       progress: 0,
+//     },
+//   },
+//   {
+//     id: "load",
+//     type: "workflow",
+//     position: { x: 450, y: 520 },
+//     data: {
+//       name: "Load",
+//       type: "Storage",
+//       duration: "0.9s",
+//       retry: 0,
+//       status: "pending",
+//       progress: 0,
+//     },
+//   },
+// ];
 
-const workflowEdges: Edge[] = [
-  {
-    id: "e1",
-    source: "extract",
-    target: "transform",
-    type: "workflow",
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    },
-    data: {
-      status: "pending",
-    },
-  },
-  {
-    id: "e2",
-    source: "extract",
-    target: "validate",
-    type: "workflow",
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    },
-    data: {
-      status: "pending",
-    },
-  },
-  {
-    id: "e3",
-    source: "transform",
-    target: "load",
-    type: "workflow",
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    },
-    data: {
-      status: "pending",
-    },
-  },
-  {
-    id: "e4",
-    source: "validate",
-    target: "load",
-    type: "workflow",
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    },
-    data: {
-      status: "pending",
-    },
-  },
-];
+// const workflowEdges: Edge[] = [
+//   {
+//     id: "e1",
+//     source: "extract",
+//     target: "transform",
+//     type: "workflow",
+//     markerEnd: {
+//       type: MarkerType.ArrowClosed,
+//     },
+//     data: {
+//       status: "pending",
+//     },
+//   },
+//   {
+//     id: "e2",
+//     source: "extract",
+//     target: "validate",
+//     type: "workflow",
+//     markerEnd: {
+//       type: MarkerType.ArrowClosed,
+//     },
+//     data: {
+//       status: "pending",
+//     },
+//   },
+//   {
+//     id: "e3",
+//     source: "transform",
+//     target: "load",
+//     type: "workflow",
+//     markerEnd: {
+//       type: MarkerType.ArrowClosed,
+//     },
+//     data: {
+//       status: "pending",
+//     },
+//   },
+//   {
+//     id: "e4",
+//     source: "validate",
+//     target: "load",
+//     type: "workflow",
+//     markerEnd: {
+//       type: MarkerType.ArrowClosed,
+//     },
+//     data: {
+//       status: "pending",
+//     },
+//   },
+// ];
 
 function Canvas() {
   const execution = useExecution();
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(workflowNodes);
+  const workflow = useWorkflowStore((state) => state.workflow);
 
-  const [edges, setEdges, onEdgesChange] = useEdgesState(workflowEdges);
+  const updateWorkflow = useWorkflowStore((state) => state.updateWorkflow);
+
+  const saveWorkflow = useWorkflowStore((state) => state.saveWorkflow);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(workflow?.nodes);
+
+  const [edges, setEdges, onEdgesChange] = useEdgesState(workflow?.edges);
 
   const [locked, setLocked] = useState(false);
 
   const [tool, setTool] = useState<"pointer" | "hand">("pointer");
+
+  useEffect(() => {
+    updateWorkflow({
+      nodes,
+
+      edges,
+    });
+  }, [nodes, edges, updateWorkflow]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      saveWorkflow();
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, [nodes, edges, saveWorkflow]);
 
   /**
    * Sync execution status into nodes

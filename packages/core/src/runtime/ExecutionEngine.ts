@@ -1,56 +1,118 @@
-import { LocalExecutor } from "../executor";
+import {
+  ExecutorRegistry,
+  LocalExecutor,
+  DelayExecutor
+} from "../executor";
+
 import { ExecutionContext } from "./ExecutionContext";
 import { DependencyResolver } from "./DependencyResolver";
 import { WorkflowExecution } from "./WorkflowExecution";
 
 export class ExecutionEngine {
-  private readonly executor = new LocalExecutor();
 
-  async run(execution: WorkflowExecution): Promise<void> {
-    const workflow = execution.workflow;
+  private readonly registry = new ExecutorRegistry();
 
-    const resolver = new DependencyResolver(workflow);
+  private readonly executor =
+    new LocalExecutor(this.registry);
 
-    const context = new ExecutionContext(workflow.id);
+  constructor() {
+    this.registry.register(
+      new DelayExecutor()
+    );
+  }
 
-    const completed = new Set<string>();
+  public registerExecutor(
+    executor: any
+  ): void {
 
-    let ready = resolver.getReadyTasks();
+    this.registry.register(
+      executor
+    );
+
+  }
+
+  async run(
+    execution: WorkflowExecution
+  ): Promise<void> {
+
+    const workflow =
+      execution.workflow;
+
+    const resolver =
+      new DependencyResolver(
+        workflow
+      );
+
+    const context =
+      new ExecutionContext(
+        workflow.id
+      );
+
+    const completed =
+      new Set<string>();
+
+    let ready =
+      resolver.getReadyTasks();
 
     while (ready.length > 0) {
+
       await Promise.all(
-        ready.map(async (taskId) => {
+
+        ready.map(async taskId => {
+
           if (completed.has(taskId)) {
             return;
           }
 
-          const task = workflow.getTask(taskId);
+          const task =
+            workflow.getTask(taskId);
 
-          const taskExecution = execution.getTask(taskId);
+          const taskExecution =
+            execution.getTask(taskId);
 
           taskExecution.start();
 
-          const result = await this.executor.execute(task, context);
+          const result =
+            await this.executor.execute(
+              task,
+              context
+            );
 
           if (!result.success) {
-            taskExecution.fail(result.error!);
+
+            taskExecution.fail(
+              result.error!
+            );
 
             throw result.error;
+
           }
+
+          // Store task output in execution context
+          context.set(task.id, result.output);
 
           taskExecution.succeed();
 
           completed.add(taskId);
-        }),
+
+        })
+
       );
 
       const unlocked: string[] = [];
 
       for (const taskId of ready) {
-        unlocked.push(...resolver.complete(taskId));
+
+        unlocked.push(
+          ...resolver.complete(taskId)
+        );
+
       }
 
       ready = unlocked;
+
     }
+
   }
+
 }

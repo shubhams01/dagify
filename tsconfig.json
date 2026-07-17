@@ -5,6 +5,18 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
 
+    "paths": {
+      "@dagify/shared": [
+        "./packages/shared/src"
+      ],
+      "@dagify/core": [
+        "./packages/core/src"
+      ],
+      "@dagify/sdk": [
+        "./packages/sdk/src"
+      ]
+    },
+
     "lib": ["ES2022"],
 
     "strict": true,
@@ -25,11 +37,13 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true
   },
+
   "include": [
     "packages/**/*.ts",
     "apps/**/*.ts",
     "examples/**/*.ts"
   ],
+
   "exclude": [
     "node_modules",
     "dist"

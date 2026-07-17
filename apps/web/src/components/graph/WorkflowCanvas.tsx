@@ -147,21 +147,25 @@ function Canvas() {
 
   const saveWorkflow = useWorkflowStore((state) => state.saveWorkflow);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(workflow?.nodes);
+  // const [nodes, setNodes, onNodesChange] = useNodesState(workflow?.nodes);
 
-  const [edges, setEdges, onEdgesChange] = useEdgesState(workflow?.edges);
+  // const [edges, setEdges, onEdgesChange] = useEdgesState(workflow?.edges);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(workflow?.nodes ?? []);
+
+  const [edges, setEdges, onEdgesChange] = useEdgesState(workflow?.edges ?? []);
 
   const [locked, setLocked] = useState(false);
 
   const [tool, setTool] = useState<"pointer" | "hand">("pointer");
 
   useEffect(() => {
-    updateWorkflow({
-      nodes,
+    if (!workflow) return;
 
-      edges,
-    });
-  }, [nodes, edges, updateWorkflow]);
+    setNodes(workflow.nodes);
+
+    setEdges(workflow.edges);
+  }, [workflow, setNodes, setEdges]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -267,8 +271,32 @@ function Canvas() {
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        // onNodesChange={onNodesChange}
+        // onEdgesChange={onEdgesChange}
+        onNodesChange={(changes) => {
+          onNodesChange(changes);
+
+          setTimeout(() => {
+            useWorkflowStore
+              .getState()
+              .setWorkflow({
+                ...useWorkflowStore.getState().workflow!,
+                nodes,
+              });
+          }, 0);
+        }}
+      onEdgesChange={(changes) => {
+          onEdgesChange(changes);
+
+          setTimeout(() => {
+            useWorkflowStore
+              .getState()
+              .setWorkflow({
+                ...useWorkflowStore.getState().workflow!,
+                edges,
+              });
+          }, 0);
+        }}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
@@ -296,6 +324,20 @@ function Canvas() {
         proOptions={{
           hideAttribution: true,
         }}
+        onConnect={(connection) => {
+        setEdges((edges) => {
+          const updated = addEdge(connection, edges);
+
+          useWorkflowStore
+            .getState()
+            .setWorkflow({
+              ...useWorkflowStore.getState().workflow!,
+              edges: updated,
+            });
+
+          return updated;
+        });
+      }}
       >
         <CanvasToolbar
           tool={tool}

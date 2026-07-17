@@ -1,17 +1,23 @@
 "use client";
 
 import SidebarItem from "./SidebarItem";
+import type { NavigationItem } from "@/mock/navigation";
 
 interface SidebarSectionProps {
-  title: string;
-
-  items: {
     title: string;
-    icon: any;
-    active?: boolean;
-    badge?: number;
-  }[];
+
+    items: NavigationItem[];
 }
+// interface SidebarSectionProps {
+//   title: string;
+
+//   items: {
+//     title: string;
+//     icon: any;
+//     active?: boolean;
+//     badge?: number;
+//   }[];
+// }
 
 export default function SidebarSection({
   title,

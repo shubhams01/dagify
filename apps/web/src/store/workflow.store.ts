@@ -11,8 +11,8 @@ import {
 } from "reactflow";
 
 import type { WorkflowDefinition } from "@/models/workflow";
-import { workflowService } from "@/services/workflow.service";
-import { defaultWorkflow } from "@/data/defaultWorkflow";
+import { WorkflowService } from "@/services/workflow.service";
+// import { defaultWorkflow } from "@/data/defaultWorkflow";
 
 interface WorkflowStore {
   workflow: WorkflowDefinition | null;
@@ -53,7 +53,9 @@ interface WorkflowStore {
 }
 
 export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
-  workflow: structuredClone(defaultWorkflow),
+  // workflow: structuredClone(defaultWorkflow),
+
+  workflow: null,
 
   dirty: false,
 
@@ -64,7 +66,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   lastSaved: undefined,
 
   async createWorkflow(name = "Untitled Workflow") {
-    const workflow = workflowService.create(name);
+    const workflow = await WorkflowService.create(name);
 
     set({
       workflow,
@@ -74,7 +76,7 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   },
 
   async loadWorkflow(id) {
-    const workflow = await workflowService.getById(id);
+    const workflow = await WorkflowService.findById(id);
 
     if (!workflow) {
       throw new Error("Workflow not found.");
@@ -98,7 +100,11 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       saving: true,
     });
 
-    await workflowService.save(workflow);
+    // await WorkflowService.save(workflow);
+    await WorkflowService.update(
+      workflow.id,
+      workflow,
+    );
 
     set({
       saving: false,
@@ -253,25 +259,25 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     });
   },
 
-  updateWorkflow(update) {
-    const workflow = get().workflow;
+  // updateWorkflow(update) {
+  //   const workflow = get().workflow;
 
-    if (!workflow) return;
+  //   if (!workflow) return;
 
-    set({
-      workflow: {
-        ...workflow,
+  //   set({
+  //     workflow: {
+  //       ...workflow,
 
-        ...update,
+  //       ...update,
 
-        metadata: {
-          ...workflow.metadata,
+  //       metadata: {
+  //         ...workflow.metadata,
 
-          updatedAt: new Date().toISOString(),
-        },
-      },
+  //         updatedAt: new Date().toISOString(),
+  //       },
+  //     },
 
-      dirty: true,
-    });
-  },
+  //     dirty: true,
+  //   });
+  // },
 }));

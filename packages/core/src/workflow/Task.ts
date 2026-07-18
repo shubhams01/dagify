@@ -30,11 +30,11 @@ export class Task<T = unknown> {
   /**
    * Optional inline task handler.
    */
-  public readonly handler?: TaskHandler<T>;
+  public readonly handler?: TaskHandler<T> | undefined;
 
   public readonly retries: number;
 
-  public readonly timeout?: number;
+  public readonly timeout?: number | undefined;
 
   constructor(
     id: string,

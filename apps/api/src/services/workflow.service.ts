@@ -1,50 +1,94 @@
-import { workflowRepository } from "../repositories/workflow.repository";
+import type { WorkflowDefinition } from "@dagify/shared";
+import {
+  workflowRepository,
+  CreateWorkflowInput,
+  UpdateWorkflowInput,
+} from "../repositories/workflow.repository";
 
 export class WorkflowService {
-  async create(
-    name: string,
-    description?: string,
-  ) {
-    const definition = {
-      viewport: {
-        x: 0,
-        y: 0,
-        zoom: 1,
-      },
+  /**
+   * Create a workflow.
+   */
+  async create(data: CreateWorkflowInput) {
+    this.validateDefinition(data.definition);
 
-      nodes: [],
-
-      edges: [],
-    };
-
-    return workflowRepository.create({
-      name,
-      description,
-      definition,
-    });
+    return workflowRepository.create(data);
   }
 
+  /**
+   * List workflows.
+   */
   async findAll() {
     return workflowRepository.findAll();
   }
 
+  /**
+   * Get workflow by id.
+   */
   async findById(id: string) {
-    return workflowRepository.findById(id);
+    const workflow = await workflowRepository.findById(id);
+
+    if (!workflow) {
+      throw new Error(`Workflow '${id}' not found.`);
+    }
+
+    return workflow;
   }
 
+  /**
+   * Update workflow.
+   */
   async update(
     id: string,
-    data: {
-      name?: string;
-      description?: string;
-      definition?: unknown;
-    },
+    data: UpdateWorkflowInput,
   ) {
+    const exists = await workflowRepository.exists(id);
+
+    if (!exists) {
+      throw new Error(`Workflow '${id}' not found.`);
+    }
+
+    if (data.definition) {
+      this.validateDefinition(data.definition);
+    }
+
     return workflowRepository.update(id, data);
   }
 
+  /**
+   * Delete workflow.
+   */
   async delete(id: string) {
-    return workflowRepository.delete(id);
+    const exists = await workflowRepository.exists(id);
+
+    if (!exists) {
+      throw new Error(`Workflow '${id}' not found.`);
+    }
+
+    await workflowRepository.delete(id);
+  }
+
+  /**
+   * Workflow validation.
+   *
+   * More validation rules will be added later.
+   */
+  private validateDefinition(
+    definition: WorkflowDefinition,
+  ) {
+    if (!definition.id.trim()) {
+      throw new Error("Workflow id is required.");
+    }
+
+    if (!definition.name.trim()) {
+      throw new Error("Workflow name is required.");
+    }
+
+    if (!definition.nodes.length) {
+      throw new Error(
+        "Workflow must contain at least one node.",
+      );
+    }
   }
 }
 

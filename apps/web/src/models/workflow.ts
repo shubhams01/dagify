@@ -21,11 +21,14 @@ export interface WorkflowViewport {
 }
 
 export interface WorkflowDefinition {
-  metadata: WorkflowMetadata;
+  id: string;
+  name: string;
+  description?: string;
 
   nodes: WorkflowNode[];
-
   edges: WorkflowEdge[];
 
   viewport: WorkflowViewport;
+
+  metadata: WorkflowMetadata;
 }

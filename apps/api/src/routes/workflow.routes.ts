@@ -1,17 +1,31 @@
 import { Router } from "express";
-
 import { workflowController } from "../controllers/workflow.controller";
 
 const router = Router();
 
-router.post("/", workflowController.create);
+router.get(
+  "/",
+  workflowController.findAll.bind(workflowController),
+);
 
-router.get("/", workflowController.findAll);
+router.get(
+  "/:id",
+  workflowController.findById.bind(workflowController),
+);
 
-router.get("/:id", workflowController.findById);
+router.post(
+  "/",
+  workflowController.create.bind(workflowController),
+);
 
-router.put("/:id", workflowController.update);
+router.put(
+  "/:id",
+  workflowController.update.bind(workflowController),
+);
 
-router.delete("/:id", workflowController.delete);
+router.delete(
+  "/:id",
+  workflowController.delete.bind(workflowController),
+);
 
 export default router;

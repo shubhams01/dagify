@@ -1,6 +1,9 @@
 import { WorkflowDefinition } from "@/models/workflow";
 
 export const defaultWorkflow: WorkflowDefinition = {
+  id: crypto.randomUUID(),
+  name: "Daily ETL",
+
   metadata: {
     id: crypto.randomUUID(),
     name: "Daily ETL",

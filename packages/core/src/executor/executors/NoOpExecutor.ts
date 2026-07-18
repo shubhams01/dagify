@@ -1,16 +1,17 @@
-import { Executor } from "../Executor";
+// import { TaskResult } from "../../runtime";
+// import { Executor } from "../Executor";
 
-export class NoOpExecutor
-    implements Executor {
+// export class NoOpExecutor
+//     implements Executor {
 
-    readonly type = "noop";
+//     readonly type = "noop";
 
-    async execute(): Promise<void> {
+//     async execute(): void{
 
-        console.log(
-            "[NoOp] Executed."
-        );
+//         console.log(
+//             "[NoOp] Executed."
+//         )
 
-    }
+//     }
 
-}
+// }

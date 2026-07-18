@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import workflowRoutes from "./workflow.routes";
+import executionRoutes from "./execution.routes";
 
 const router = Router();
 
@@ -12,5 +13,6 @@ router.get("/health", (_, res) => {
 });
 
 router.use("/workflows", workflowRoutes);
+router.use("/executions", executionRoutes);
 
 export default router;

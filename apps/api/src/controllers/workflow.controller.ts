@@ -1,71 +1,88 @@
 import { Request, Response } from "express";
-import { z } from "zod";
-
 import { workflowService } from "../services/workflow.service";
 
-const createWorkflowSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
-});
-
 export class WorkflowController {
+  /**
+   * POST /workflows
+   */
   async create(req: Request, res: Response) {
-    const body = createWorkflowSchema.parse(req.body);
+    try {
+      const workflow = await workflowService.create(req.body);
 
-    const workflow = await workflowService.create(
-      body.name,
-      body.description,
-    );
-
-    res.status(201).json({
-      success: true,
-      data: workflow,
-    });
+      return res.status(201).json(workflow);
+    } catch (error) {
+      return this.handleError(res, error);
+    }
   }
 
-  async findAll(req: Request, res: Response) {
-    const workflows = await workflowService.findAll();
+  /**
+   * GET /workflows
+   */
+  async findAll(_: Request, res: Response) {
+    try {
+      const workflows = await workflowService.findAll();
 
-    res.json({
-      success: true,
-      data: workflows,
-    });
+      return res.json(workflows);
+    } catch (error) {
+      return this.handleError(res, error);
+    }
   }
 
+  /**
+   * GET /workflows/:id
+   */
   async findById(req: Request, res: Response) {
-    const workflow = await workflowService.findById(
-      req.params.id,
-    );
+    try {
+      const workflow = await workflowService.findById(req.params.id);
 
-    if (!workflow) {
-      return res.status(404).json({
-        success: false,
-        message: "Workflow not found",
+      return res.json(workflow);
+    } catch (error) {
+      return this.handleError(res, error);
+    }
+  }
+
+  /**
+   * PUT /workflows/:id
+   */
+  async update(req: Request, res: Response) {
+    try {
+      const workflow = await workflowService.update(
+        req.params.id,
+        req.body,
+      );
+
+      return res.json(workflow);
+    } catch (error) {
+      return this.handleError(res, error);
+    }
+  }
+
+  /**
+   * DELETE /workflows/:id
+   */
+  async delete(req: Request, res: Response) {
+    try {
+      await workflowService.delete(req.params.id);
+
+      return res.status(204).send();
+    } catch (error) {
+      return this.handleError(res, error);
+    }
+  }
+
+  private handleError(
+    res: Response,
+    error: unknown,
+  ) {
+    if (error instanceof Error) {
+      return res.status(400).json({
+        message: error.message,
       });
     }
 
-    res.json({
-      success: true,
-      data: workflow,
+    return res.status(500).json({
+      message: "Internal server error",
     });
-  }
-
-  async update(req: Request, res: Response) {
-    const workflow = await workflowService.update(
-      req.params.id,
-      req.body,
-    );
-
-    res.json({
-      success: true,
-      data: workflow,
-    });
-  }
-
-  async delete(req: Request, res: Response) {
-    await workflowService.delete(req.params.id);
-
-    res.status(204).send();
   }
 }
 

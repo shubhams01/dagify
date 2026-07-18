@@ -11,6 +11,7 @@ import ReactFlow, {
   MiniMap,
   Node,
   ReactFlowProvider,
+  addEdge,
   useEdgesState,
   useNodesState,
 } from "reactflow";

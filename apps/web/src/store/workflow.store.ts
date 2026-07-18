@@ -15,6 +15,9 @@ import { WorkflowService } from "@/services/workflow.service";
 // import { defaultWorkflow } from "@/data/defaultWorkflow";
 
 interface WorkflowStore {
+
+  workflowId: string | null;
+
   workflow: WorkflowDefinition | null;
 
   dirty: boolean;
@@ -50,10 +53,18 @@ interface WorkflowStore {
   removeNode(id: string): void;
 
   updateNode(id: string, data: Record<string, unknown>): void;
+
+  updateWorkflow(
+    update: Partial<Omit<WorkflowDefinition, "metadata">> & {
+      metadata?: Partial<WorkflowDefinition["metadata"]>;
+    },
+  ): void;
 }
 
 export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   // workflow: structuredClone(defaultWorkflow),
+
+  workflowId: null,
 
   workflow: null,
 
@@ -69,13 +80,13 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     const workflow = await WorkflowService.create(name);
 
     set({
-      workflow,
+      workflowId: workflow.id,
 
       dirty: true,
     });
   },
 
-  async loadWorkflow(id) {
+  async loadWorkflow(id: string) {
     const workflow = await WorkflowService.findById(id);
 
     if (!workflow) {
@@ -83,8 +94,8 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     }
 
     set({
-      workflow,
-
+      workflowId: workflow.id,
+      workflow: workflow.definition,
       dirty: false,
     });
   },
@@ -259,25 +270,25 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     });
   },
 
-  // updateWorkflow(update) {
-  //   const workflow = get().workflow;
+  updateWorkflow(update) {
+    const workflow = get().workflow;
 
-  //   if (!workflow) return;
+    if (!workflow) return;
 
-  //   set({
-  //     workflow: {
-  //       ...workflow,
+    set({
+      workflow: {
+        ...workflow,
 
-  //       ...update,
+        ...update,
 
-  //       metadata: {
-  //         ...workflow.metadata,
+        metadata: {
+          ...workflow.metadata,
 
-  //         updatedAt: new Date().toISOString(),
-  //       },
-  //     },
+          updatedAt: new Date().toISOString(),
+        },
+      },
 
-  //     dirty: true,
-  //   });
-  // },
+      dirty: true,
+    });
+  },
 }));

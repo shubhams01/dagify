@@ -1,33 +1,33 @@
-import {
-  NodeBuilder,
-  WorkflowBuilder
-} from "./index";
+// import {
+//   NodeBuilder,
+//   WorkflowBuilder
+// } from "./index";
 
-const workflow = new WorkflowBuilder("Demo Workflow");
+// const workflow = new WorkflowBuilder("Demo Workflow");
 
-const node1 = new NodeBuilder(
-  "postgres",
-  "Fetch Users"
-)
-  .config({
-    query: "SELECT * FROM users"
-  })
-  .build();
+// const node1 = new NodeBuilder(
+//   "postgres",
+//   "Fetch Users"
+// )
+//   .config({
+//     query: "SELECT * FROM users"
+//   })
+//   .build();
 
-const node2 = new NodeBuilder(
-  "postgres",
-  "Update Users"
-)
-  .config({
-    query: "UPDATE users SET active=true"
-  })
-  .build();
+// const node2 = new NodeBuilder(
+//   "postgres",
+//   "Update Users"
+// )
+//   .config({
+//     query: "UPDATE users SET active=true"
+//   })
+//   .build();
 
-workflow
-  .addNode(node1)
-  .addNode(node2)
-  .connect(node1.id, node2.id);
+// workflow
+//   .addNode(node1)
+//   .addNode(node2)
+//   .connect(node1.id, node2.id);
 
-console.log(
-  JSON.stringify(workflow.build(), null, 2)
-);
+// console.log(
+//   JSON.stringify(workflow.build(), null, 2)
+// );

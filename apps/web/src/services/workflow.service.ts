@@ -1,16 +1,5 @@
 import { api } from "./api";
-
-export interface WorkflowDefinition {
-  viewport: {
-    x: number;
-    y: number;
-    zoom: number;
-  };
-
-  nodes: any[];
-
-  edges: any[];
-}
+import type { WorkflowDefinition } from "@/models/workflow";
 
 export interface Workflow {
   id: string;

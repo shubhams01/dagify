@@ -84,7 +84,7 @@ export const useExecutionStore = create<ExecutionState>((set, get) => ({
     const total = 4;
 
     set((state) => {
-      const nodes = {
+      const nodes: Record<string, ExecutionNode> = {
         ...state.nodes,
         [id]: {
           ...state.nodes[id],

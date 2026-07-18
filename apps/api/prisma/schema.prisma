@@ -10,7 +10,56 @@ model Workflow {
   id          String   @id @default(cuid())
   name        String
   description String?
+
+  // Complete WorkflowDefinition JSON
   definition  Json
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  runs         WorkflowRun[]
+}
+
+model WorkflowRun {
+  id          String   @id @default(cuid())
+
+  workflowId  String
+  workflow    Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  status      RunStatus @default(PENDING)
+
+  startedAt   DateTime?
+  finishedAt  DateTime?
+
+  createdAt   DateTime @default(now())
+
+  tasks        TaskRun[]
+}
+
+model TaskRun {
+  id           String @id @default(cuid())
+
+  runId        String
+  run          WorkflowRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  taskId       String
+
+  status       RunStatus @default(PENDING)
+
+  startedAt    DateTime?
+  finishedAt   DateTime?
+
+  output       Json?
+  error        String?
+
+  createdAt    DateTime @default(now())
+}
+
+enum RunStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  CANCELLED
+  SKIPPED
 }

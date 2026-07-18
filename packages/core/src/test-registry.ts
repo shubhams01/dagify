@@ -1,15 +1,15 @@
 import {
     DelayExecutor,
     ExecutorRegistry,
-    NoOpExecutor
+    // NoOpExecutor
 } from "./executor";
 
 const registry =
     new ExecutorRegistry();
 
-registry.register(
-    new NoOpExecutor()
-);
+// registry.register(
+//     new NoOpExecutor()
+// );
 
 registry.register(
     new DelayExecutor()
